@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İyi Ki Doğdun Sevgilim!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0b0114;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ŞİFRE EKRANI */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1f012e, #05000a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease;
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-box h2 {
+            margin-bottom: 20px;
+            color: #ff4a7d;
+            font-size: 24px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .login-box input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px #ff4a7d;
+        }
+
+        .login-box button {
+            background: linear-gradient(45deg, #ff4a7d, #9c27b0);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .login-box button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 74, 125, 0.4);
+        }
+
+        #error-msg {
+            color: #ff3333;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        /* ANA İÇERİK */
+        #main-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+            position: relative;
+            z-index: 2;
+            padding: 40px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .header-title {
+            font-size: 3rem;
+            color: #ff4a7d;
+            text-shadow: 0 0 20px rgba(255, 74, 125, 0.6);
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #b39ddb;
+            margin-bottom: 40px;
+        }
+
+        /* FOTOĞRAFLAR */
+        .photo-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .photo-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: rotate(-3deg);
+            transition: 0.3s;
+            max-width: 280px;
+        }
+
+        .photo-card:nth-child(even) {
+            transform: rotate(3deg);
+        }
+
+        .photo-card:hover {
+            transform: rotate(0deg) scale(1.05);
+            z-index: 10;
+        }
+
+        .photo-card img {
+            width: 100%;
+            border-radius: 10px;
+            display: block;
+            height: 300px;
+            object-fit: cover;
+            background: #222;
+        }
+
+        /* SAYAÇ */
+        .counter-section {
+            background: rgba(156, 39, 176, 0.15);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(156, 39, 176, 0.3);
+        }
+
+        .counter-section h3 {
+            color: #e040fb;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .time-box {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px 15px;
+            border-radius: 10px;
+            min-width: 70px;
+        }
+
+        .time-box span {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .time-box label {
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        /* UZUN MESAJ */
+        .message-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: left;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            border-left: 5px solid #ff4a7d;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+        }
+
+        .message-box p {
+            margin-bottom: 20px;
+        }
+
+        .signature {
+            text-align: right;
+            font-weight: bold;
+            color: #ff4a7d;
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+
+        /* MÜZİK ÇALAR */
+        .audio-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            .header-title { font-size: 2rem; }
+            .countdown { gap: 8px; }
+            .time-box { min-width: 55px; padding: 8px; }
+            .time-box span { font-size: 1.3rem; }
+            .message-box { padding: 20px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="fireworksCanvas"></canvas>
+
+    <!-- GİRİŞ EKRANI -->
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2>Sana Özel Bir Sürpriz Var ❤️</h2>
+            <p style="color: #aaa; margin-bottom: 20px; font-size: 14px;">Lütfen giriş yapmak için şifreni gir sevgilim...</p>
+            <input type="password" id="password-input" placeholder="Şifreniz...">
+            <br>
+            <button onclick="checkPassword()">Giriş Yap ✨</button>
+            <div id="error-msg">Yanlış şifre! Tekrar dene bitanem.</div>
+        </div>
+    </div>
+
+    <!-- ANA İÇERİK -->
+    <div id="main-content">
+        <h1 class="header-title">İyi Ki Doğdun Ayşe'm! 🎂</h1>
+        <p class="subtitle">Bugün 20 Nisan, dünyanın en güzel kızının doğum günü...</p>
+
+        <div class="photo-container">
+            <div class="photo-card">
+                <img src="foto1.jpg" alt="Ayşe 1" onerror="this.src='https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=500';">
+                <p style="margin-top: 10px; color: #ff4a7d; font-weight: bold;">Gülüşün Dünyaya Bedel...</p>
+            </div>
+            <div class="photo-card">
+                <img src="foto2.jpg" alt="Ayşe 2" onerror="this.src='https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=500';">
+                <p style="margin-top: 10px; color: #ff4a7d; font-weight: bold;">Bakışına Ömrümü Verdiğim...</p>
+            </div>
+        </div>
+
+        <!-- TANIŞMA SAYACI (11 HAZİRAN 2026) -->
+        <div class="counter-section">
+            <h3>İyi Ki Karşıma Çıktın... 🗓️</h3>
+            <p style="color: #b39ddb; margin-bottom: 15px; font-size: 14px;">11 Haziran 2026'dan beri kalbimin tek sahibisin. Biz seninle tam olarak:</p>
+            <div class="countdown" id="meet-counter">
+                <div class="time-box"><span id="days">00</span><label>Gün</label></div>
+                <div class="time-box"><span id="hours">00</span><label>Saat</label></div>
+                <div class="time-box"><span id="minutes">00</span><label>Dakika</label></div>
+                <div class="time-box"><span id="seconds">00</span><label>Saniye</label></div>
+            </div>
+            <p style="margin-top: 15px; font-weight: bold; color: #ff4a7d;">Süredir beraberiz ve her saniyem seninle çok özel...</p>
+        </div>
+
+        <div class="message-box">
+            <p><strong>Benim Güzel Ayşe'm, Kalbimin İçi...</strong></p>
+            <p>Bugün takvimler 20 Nisan'ı gösterirken sadece senin doğduğun günü değil, benim dünyamın en değerli hazinesinin var oluşunu kutluyorum. Hayatıma girdiğin o ilk andan beri, yani 11 Haziran 2026'dan bu yana içimde bambaşka bir neşe, bambaşka bir huzur var. Kısa sürede hayatımın en büyük anlamı olmayı başardın.</p>
+            <p>İyi ki doğdun, iyi ki benim sevgilim oldun. Sen benim hayatıma sadece aşkı değil; gülüşlerin en güzelini getirdin. Dünyadaki hiçbir şey senin o sıcacık sarılışından, gözlerimin içine bakarak kalbimi eritmenden daha kıymetli olamaz. Yanında olduğum her an zamanı durdurmak istiyorum.</p>
+            <p>Gelecekteki tüm yaşlarında, her yeni yaşında ellerimiz hep böyle sımsıkı kenetli olsun. Sana olan sevgim her gün, her saniye katlanarak büyümeye devam edecek. Seni her şeyden çok, canımdan çok seviyorum biriciğim. Doğum günün kutlu olsun, yeni yaşın sana kalbin gibi saf ve sonsuz güzellikler getirsin sevgilim...</p>
+            <div class="signature">Seni Çok Senev Sevgilin... ❤️</div>
+        </div>
+
+        <div class="audio-box">
+            <span style="font-size: 20px;">🎵</span>
+            <audio id="bg-music" src="muzik.mp3" controls loop></audio>
+        </div>
+    </div>
+
+    <script>
+        const DOGRU_SIFRE = "Ayşem"; 
+
+        function checkPassword() {
+            const input = document.getElementById("password-input").value;
+            const error = document.getElementById("error-msg");
+            
+            if(input === DOGRU_SIFRE) {
+                document.getElementById("login-overlay").style.opacity = "0";
+                setTimeout(() => {
+                    document.getElementById("login-overlay").style.display = "none";
+                    const mainContent = document.getElementById("main-content");
+                    mainContent.style.display = "block";
+                    setTimeout(() => { mainContent.style.opacity = "1"; }, 50);
+                    
+                    const audio = document.getElementById("bg-music");
+                    audio.play().catch(() => console.log("Müzik için play izni gerekiyor."));
+                    
+                    initEffects();
+                }, 800);
+            } else {
+                error.style.display = "block";
+            }
+        }
+
+        // TANIŞMA TARİHİ GÜNCELLEMESİ (11 HAZİRAN 2026)
+        const tanismaTarihi = new Date("June 11, 2026 00:00:00").getTime();
+
+        function updateCounter() {
+            const simdi = new Date().getTime();
+            const fark = simdi - tanismaTarihi;
+
+            const gun = Math.floor(fark / (1000 * 60 * 60 * 24));
+            const saat = Math.floor((fark % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const dakika = Math.floor((fark % (1000 * 60 * 60)) / (1000 * 60));
+            const saniye = Math.floor((fark % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerText = gun < 10 ? "0" + gun : gun;
+            document.getElementById("hours").innerText = saat < 10 ? "0" + saat : saat;
+            document.getElementById("minutes").innerText = dakika < 10 ? "0" + dakika : dakika;
+            document.getElementById("seconds").innerText = saniye < 10 ? "0" + saniye : saniye;
+        }
+        setInterval(updateCounter, 1000);
+
+        // CANVAS EFEKTLERİ
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let particles = [];
+        let hearts = [];
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.radius = Math.random() * 3 + 1;
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 8,
+                    y: (Math.random() - 0.5) * 8
+                };
+                this.alpha = 1;
+                this.decay = Math.random() * 0.015 + 0.015;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.velocity.y += 0.05;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= this.decay;
+            }
+        }
+
+        class Heart {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 10 + 10;
+                this.speedX = (Math.random() - 0.5) * 2;
+                this.speedY = -Math.random() * 2 - 1;
+                this.alpha = 1;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = `rgba(255, ${Math.floor(Math.random() * 100)}, 125, ${this.alpha})`;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.bezierCurveTo(this.x - this.size / 2, this.y - this.size / 2, this.x - this.size, this.y + this.size / 3, this.x, this.y + this.size);
+                ctx.bezierCurveTo(this.x + this.size, this.y + this.size / 3, this.x + this.size / 2, this.y - this.size / 2, this.x, this.y);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= 0.005;
+            }
+        }
+
+        function createFirework(x, y) {
+            const colors = ['#ff4a7d', '#ff0055', '#9c27b0', '#e040fb', '#00e5ff', '#ffff00'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 60; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function initEffects() {
+            setInterval(() => {
+                if(document.getElementById("main-content").style.display === "block") {
+                    createFirework(Math.random() * canvas.width, Math.random() * (canvas.height * 0.6));
+                }
+            }, 1000);
+
+            setInterval(() => {
+                if(document.getElementById("main-content").style.display === "block") {
+                    hearts.push(new Heart(Math.random() * canvas.width, canvas.height + 20));
+                }
+            }, 300);
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.fillStyle = 'rgba(11, 1, 20, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].alpha <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            for (let i = hearts.length - 1; i >= 0; i--) {
+                hearts[i].update();
+                hearts[i].draw();
+                if (hearts[i].alpha <= 0) {
+                    hearts.splice(i, 1);
+                }
+            }
+        }
+
+        document.getElementById("password-input").addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                checkPassword();
+            }
+        });
+    </script>
+</body>
+                  </html>
+                  
